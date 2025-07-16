@@ -1,0 +1,824 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Mastery</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsPDF/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Tailwind CSS (inlined for brevity, normally via CDN) */
+        .absolute{position:absolute}.fixed{position:fixed}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-screen{height:100vh}.w-48{width:12rem}.w-64{width:16rem}.w-full{width:100%}.max-w-4xl{max-width:56rem}.flex-1{flex:1 1 0%}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.space-x-4>:not([hidden])~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-lg{border-radius:.5rem}.border{border-width:1px}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94 / var(--tw-bg-opacity))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity))}.p-2{padding:.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.ml-auto{margin-left:auto}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.font-sans{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-sm{font-size:.875rem;line-height:1.25rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.leading-tight{line-height:1.25}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity))}.text-green-500{--tw-text-opacity:1;color:rgb(34 197 94 / var(--tw-text-opacity))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.text-center{text-align:center}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / .1),0 1px 2px -1px rgb(0 0 0 / .1);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:150ms}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity))}.hover\:border-gray-500:hover{--tw-border-opacity:1;border-color:rgb(107 114 128 / var(--tw-border-opacity))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity))}@media (min-width:640px){.sm\:p-2{padding:.5rem}.sm\:p-4{padding:1rem}.sm\:w-40{width:10rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width:768px){.md\:ml-48{margin-left:12rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-2xl{font-size:1.5rem;line-height:2rem}}@media (min-width:1024px){.lg\:ml-64{margin-left:16rem}.lg\:w-64{width:16rem}.lg\:flex-row{flex-direction:row}}
+
+        /* Custom CSS */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            padding-left: 1rem;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .accordion-content.active {
+            max-height: 600px;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            opacity: 1;
+        }
+        .accordion-toggle::after {
+            content: '\25B6';
+            display: inline-block;
+            margin-left: 0.5rem;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .accordion-toggle.active::after {
+            content: '\25BC';
+            transform: rotate(90deg);
+        }
+        .accordion-toggle {
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+        .selected {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+            border-left: 4px solid #3b82f6;
+            padding-left: 0.75rem;
+        }
+        .accordion-item a:hover {
+            background-color: #f3f4f6;
+        }
+        aside {
+            transition: transform 0.3s ease-in-out;
+        }
+        .vertical-format {
+            font-family: monospace;
+            white-space: pre;
+            text-align: center;
+            line-height: 1.5;
+            display: inline-block;
+            width: 100%;
+        }
+        .number-line {
+            font-family: monospace;
+            white-space: pre;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .parameters-panel {
+            width: 256px;
+            min-width: 192px;
+        }
+        @media (max-width: 640px) {
+            .parameters-panel {
+                width: 192px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow h-screen fixed p-4 overflow-y-auto lg:w-64 md:w-48 sm:w-40 z-10">
+        <h2 class="text-xl font-semibold mb-4 sm:text-lg">Select a Skill</h2>
+        <div class="space-y-2">
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Arithmetic</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('addition')" class="block px-4 py-2 text-gray-700 sm:text-sm" id="addition">Addition</a>
+                    <a href="#" onclick="startPractice('subtraction')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" id="subtraction">Subtraction</a>
+                    <a href="#" onclick="startPractice('multiplication')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Multiplication</a>
+                    <a href="#" onclick="startPractice('division')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Division</a>
+                    <a href="#" onclick="startPractice('fractions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Fractions</a>
+                    <a href="#" onclick="startPractice('decimals')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Decimals</a>
+                    <a href="#" onclick="startPractice('percentages')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Percentages</a>
+                    <a href="#" onclick="startPractice('integers')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Integers</a>
+                    <a href="#" onclick="startPractice('order_of_operations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Order of Operations</a>
+                    <a href="#" onclick="startPractice('prime_numbers')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Prime Numbers and Factors</a>
+                    <a href="#" onclick="startPractice('ratios_proportions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Ratios and Proportions</a>
+                    <a href="#" onclick="startPractice('exponents')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Exponents</a>
+                    <a href="#" onclick="startPractice('square_roots')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Square Roots and Radicals</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Algebra</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('expressions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Expressions</a>
+                    <a href="#" onclick="startPractice('equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Equations</a>
+                    <a href="#" onclick="startPractice('inequalities')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Inequalities</a>
+                    <a href="#" onclick="startPractice('polynomials')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Polynomials</a>
+                    <a href="#" onclick="startPractice('exponents_radicals')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Exponents and Radicals</a>
+                    <a href="#" onclick="startPractice('functions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Functions</a>
+                    <a href="#" onclick="startPractice('graphing')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Graphing</a>
+                    <a href="#" onclick="startPractice('systems_of_equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Systems of Equations</a>
+                    <a href="#" onclick="startPractice('word_problems')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Word Problems</a>
+                    <a href="#" onclick="startPractice('sequences_series')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Sequences and Series</a>
+                    <a href="#" onclick="startPractice('rational_expressions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Rational Expressions</a>
+                    <a href="#" onclick="startPractice('complex_numbers')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Complex Numbers</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Geometry</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('points_lines_angles')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Points, Lines, and Angles</a>
+                    <a href="#" onclick="startPractice('triangles')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Triangles</a>
+                    <a href="#" onclick="startPractice('quadrilaterals')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Quadrilaterals</a>
+                    <a href="#" onclick="startPractice('circles')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Circles</a>
+                    <a href="#" onclick="startPractice('polygons')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Polygons</a>
+                    <a href="#" onclick="startPractice('coordinate_geometry')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Coordinate Geometry</a>
+                    <a href="#" onclick="startPractice('transformations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Transformations</a>
+                    <a href="#" onclick="startPractice('area_perimeter')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Area and Perimeter</a>
+                    <a href="#" onclick="startPractice('volume_surface_area')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Volume and Surface Area</a>
+                    <a href="#" onclick="startPractice('trigonometry_basics')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Trigonometry Basics</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Trigonometry</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('trig_ratios')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Trigonometric Ratios</a>
+                    <a href="#" onclick="startPractice('unit_circle')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Unit Circle</a>
+                    <a href="#" onclick="startPractice('trig_identities')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Trigonometric Identities</a>
+                    <a href="#" onclick="startPractice('trig_equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Trigonometric Equations</a>
+                    <a href="#" onclick="startPractice('trig_applications')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Applications</a>
+                    <a href="#" onclick="startPractice('trig_graphs')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Graphs of Trigonometric Functions</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Calculus</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('limits')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Limits</a>
+                    <a href="#" onclick="startPractice('derivatives')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Derivatives</a>
+                    <a href="#" onclick="startPractice('derivative_applications')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Applications of Derivatives</a>
+                    <a href="#" onclick="startPractice('integrals')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Integrals</a>
+                    <a href="#" onclick="startPractice('integral_applications')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Applications of Integrals</a>
+                    <a href="#" onclick="startPractice('sequences_series_calculus')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Sequences and Series</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Statistics and Probability</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('descriptive_stats')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Descriptive Statistics</a>
+                    <a href="#" onclick="startPractice('data_representation')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Data Representation</a>
+                    <a href="#" onclick="startPractice('probability')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Probability</a>
+                    <a href="#" onclick="startPractice('distributions')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Distributions</a>
+                    <a href="#" onclick="startPractice('stat_inference')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Statistical Inference</a>
+                    <a href="#" onclick="startPractice('permutations_combinations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Permutations and Combinations</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Discrete Mathematics</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('set_theory')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Set Theory</a>
+                    <a href="#" onclick="startPractice('logic')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Logic</a>
+                    <a href="#" onclick="startPractice('combinatorics')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Combinatorics</a>
+                    <a href="#" onclick="startPractice('graph_theory')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Graph Theory</a>
+                    <a href="#" onclick="startPractice('number_theory')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Number Theory</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Linear Algebra</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('vectors')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Vectors</a>
+                    <a href="#" onclick="startPractice('matrices')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Matrices</a>
+                    <a href="#" onclick="startPractice('systems_linear_equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Systems of Linear Equations</a>
+                    <a href="#" onclick="startPractice('eigenvalues')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Eigenvalues and Eigenvectors</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Differential Equations</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('first_order_equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">First-Order Equations</a>
+                    <a href="#" onclick="startPractice('second_order_equations')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Second-Order Equations</a>
+                    <a href="#" onclick="startPractice('diff_eq_applications')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Applications</a>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-toggle cursor-pointer px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm" onclick="toggleAccordion(this)">Advanced Topics</div>
+                <div class="accordion-content">
+                    <a href="#" onclick="startPractice('abstract_algebra')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Abstract Algebra</a>
+                    <a href="#" onclick="startPractice('real_analysis')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Real Analysis</a>
+                    <a href="#" onclick="startPractice('complex_analysis')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Complex Analysis</a>
+                    <a href="#" onclick="startPractice('topology')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Topology</a>
+                    <a href="#" onclick="startPractice('numerical_methods')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-sm">Numerical Methods</a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 lg:ml-64 md:ml-48 sm:ml-40 transition-all duration-300">
+        <header class="bg-blue-600 text-white p-4 text-center">
+            <h1 class="text-3xl font-bold md:text-2xl sm:text-xl">Math Mastery</h1>
+            <p class="mt-2 md:text-sm sm:text-xs">Practice specific math skills to improve your proficiency!</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto mt-8 p-4 sm:p-2">
+            <section id="welcome-screen" class="bg-white rounded-lg shadow p-6 sm:p-4">
+                <h2 class="text-2xl font-semibold mb-4 sm:text-xl">Welcome to Math Mastery</h2>
+                <p class="text-lg sm:text-sm">Select a skill from the sidebar to start practicing!</p>
+            </section>
+
+            <section id="practice-area" class="hidden bg-white rounded-lg shadow p-6 sm:p-4">
+                <h2 id="practice-title" class="text-2xl font-semibold mb-4 sm:text-xl"></h2>
+                <div id="problem-display" class="text-xl mb-4 text-center sm:text-lg"></div>
+                <input id="user-answer" type="number" class="border p-2 rounded w-full mb-4 sm:text-sm" placeholder="Enter your answer">
+                <button onclick="checkAnswer()" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 sm:text-sm">Submit Answer</button>
+                <p id="feedback" class="mt-4 text-lg sm:text-sm"></p>
+            </section>
+
+            <section id="game-start-screen" class="hidden bg-white rounded-lg shadow p-6 sm:p-4">
+                <h2 class="text-2xl font-semibold mb-4 sm:text-xl" id="game-start-title"></h2>
+                <div class="mb-4">
+                    <label for="name" class="block text-lg mb-2 sm:text-sm">Name:</label>
+                    <input id="name" type="text" class="border p-2 rounded w-full sm:text-sm" placeholder="Enter your name">
+                </div>
+                <button onclick="startGame()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 sm:text-sm">Let's Practice</button>
+                <p id="start-error" class="text-red-500 mt-4 hidden sm:text-sm">Please enter your name.</p>
+            </section>
+
+            <section id="game-area" class="hidden bg-white rounded-lg shadow p-6 sm:p-4 flex flex-col lg:flex-row">
+                <div class="flex-1">
+                    <div id="game-problem" class="mb-6 text-center" style="font-size: 72px;"></div>
+                    <div id="answer-options" class="grid grid-cols-2 gap-6 mb-6">
+                        <button onclick="checkGameAnswer(0)" class="bg-blue-500 text-white py-4 px-6 rounded-lg hover:bg-blue-700" style="font-size: 72px;"></button>
+                        <button onclick="checkGameAnswer(1)" class="bg-blue-500 text-white py-4 px-6 rounded-lg hover:bg-blue-700" style="font-size: 72px;"></button>
+                        <button onclick="checkGameAnswer(2)" class="bg-blue-500 text-white py-4 px-6 rounded-lg hover:bg-blue-700" style="font-size: 72px;"></button>
+                        <button onclick="checkGameAnswer(3)" class="bg-blue-500 text-white py-4 px-6 rounded-lg hover:bg-blue-700" style="font-size: 72px;"></button>
+                    </div>
+                    <div id="game-feedback" class="text-2xl mb-6 sm:text-lg text-center"></div>
+                    <div class="flex justify-center mb-6">
+                        <button onclick="nextQuestion()" class="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-700 text-lg sm:text-sm">Next Question</button>
+                    </div>
+                    <div class="flex justify-center mb-6 space-x-4">
+                        <div class="w-48">
+                            <label for="font-size" class="block text-lg mb-2 sm:text-sm">Font Size:</label>
+                            <select id="font-size" onchange="updateFontSize()" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-4 py-2 rounded shadow leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                                <option value="small">Small (24px)</option>
+                                <option value="medium">Medium (48px)</option>
+                                <option value="large" selected>Large (72px)</option>
+                                <option value="extra-large">Extra Large (96px)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-center mb-6">
+                        <p id="score" class="text-2xl sm:text-lg">Correct: 0 (0.00%) | Wrong: 0 (0.00%)</p>
+                    </div>
+                    <div class="flex justify-center">
+                        <button onclick="downloadResults()" class="bg-green-500 text-white py-2 px-6 rounded hover:bg-blue-700 text-lg sm:text-sm">Download Results</button>
+                    </div>
+                </div>
+                <div id="addition-parameters" class="parameters-panel bg-gray-50 p-4 rounded-lg shadow ml-auto mt-4 lg:mt-0 hidden">
+                    <h3 class="text-lg font-semibold mb-4 sm:text-sm">Addition Settings</h3>
+                    <div class="mb-4">
+                        <label for="num-digits" class="block text-sm mb-2">Number of Digits:</label>
+                        <select id="num-digits" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-3 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                            <option value="1" selected>1-digit</option>
+                            <option value="2">2-digit</option>
+                            <option value="3">3-digit</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="carry" type="checkbox" class="mr-2">
+                            Allow Carrying
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label for="num-addends" class="block text-sm mb-2">Number of Addends:</label>
+                        <select id="num-addends" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-3 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                            <option value="2" selected>2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="zeros" type="checkbox" class="mr-2">
+                            Include Zeros (e.g., 20, 05)
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="number-line" type="checkbox" class="mr-2">
+                            Show Number Line
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label for="display-format" class="block text-sm mb-2">Display Format:</label>
+                        <select id="display-format" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-3 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                            <option value="horizontal" selected>Horizontal</option>
+                            <option value="vertical">Vertical</option>
+                        </select>
+                    </div>
+                    <button onclick="generateGameProblem()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full text-sm">Apply Parameters</button>
+                </div>
+                <div id="subtraction-parameters" class="parameters-panel bg-gray-50 p-4 rounded-lg shadow ml-auto mt-4 lg:mt-0 hidden">
+                    <h3 class="text-lg font-semibold mb-4 sm:text-sm">Subtraction Settings</h3>
+                    <div class="mb-4">
+                        <label for="sub-num-digits" class="block text-sm mb-2">Number of Digits:</label>
+                        <select id="sub-num-digits" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-3 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                            <option value="1" selected>1-digit</option>
+                            <option value="2">2-digit</option>
+                            <option value="3">3-digit</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="borrow" type="checkbox" class="mr-2">
+                            Allow Borrowing
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="sub-zeros" type="checkbox" class="mr-2">
+                            Include Zeros (e.g., 20, 05)
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center text-sm">
+                            <input id="sub-number-line" type="checkbox" class="mr-2">
+                            Show Number Line
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sub-display-format" class="block text-sm mb-2">Display Format:</label>
+                        <select id="sub-display-format" class="block w-full bg-white border border-gray-300 hover:border-gray-500 px-3 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm">
+                            <option value="horizontal" selected>Horizontal</option>
+                            <option value="vertical">Vertical</option>
+                        </select>
+                    </div>
+                    <button onclick="generateGameProblem()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full text-sm">Apply Parameters</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let currentSkill = '';
+        let currentProblem = {};
+        let correct = 0;
+        let wrong = 0;
+        let total = 0;
+        let name = '';
+        let fontSize = 'large';
+        let answerOptions = [];
+        let questionHistory = [];
+
+        function toggleAccordion(element) {
+            try {
+                const content = element.nextElementSibling;
+                const isActive = content.classList.contains('active');
+                document.querySelectorAll('.accordion-content').forEach(sib => {
+                    if (sib !== content) {
+                        sib.classList.remove('active');
+                        sib.previousElementSibling.classList.remove('active');
+                    }
+                });
+                content.classList.toggle('active', !isActive);
+                element.classList.toggle('active', !isActive);
+            } catch (e) {
+                console.error('Error in toggleAccordion:', e);
+            }
+        }
+
+        function startPractice(skill) {
+            try {
+                currentSkill = skill;
+                document.getElementById('welcome-screen').classList.add('hidden');
+                document.getElementById('practice-area').classList.add('hidden');
+                document.getElementById('game-start-screen').classList.add('hidden');
+                document.getElementById('game-area').classList.add('hidden');
+                document.getElementById('addition-parameters').classList.add('hidden');
+                document.getElementById('subtraction-parameters').classList.add('hidden');
+
+                document.querySelectorAll('.accordion-item a').forEach(item => item.classList.remove('selected'));
+                const selectedItem = document.getElementById(skill);
+                if (selectedItem) {
+                    selectedItem.classList.add('selected');
+                    const content = selectedItem.closest('.accordion-content');
+                    if (content) content.classList.add('active');
+                    const parentToggle = content.previousElementSibling;
+                    if (parentToggle) parentToggle.classList.add('active');
+                }
+
+                if (skill === 'addition' || skill === 'subtraction') {
+                    document.getElementById('game-start-screen').classList.remove('hidden');
+                    document.getElementById('game-start-title').textContent = `${skill.charAt(0).toUpperCase() + skill.slice(1)} Practice`;
+                } else {
+                    document.getElementById('practice-area').classList.remove('hidden');
+                    document.getElementById('practice-title').textContent = `Practice ${skill.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`;
+                    generateProblem();
+                }
+            } catch (e) {
+                console.error('Error in startPractice:', e);
+            }
+        }
+
+        function startGame() {
+            try {
+                name = document.getElementById('name').value.trim();
+                const error = document.getElementById('start-error');
+                if (name) {
+                    document.getElementById('game-start-screen').classList.add('hidden');
+                    document.getElementById('game-area').classList.remove('hidden');
+                    error.classList.add('hidden');
+                    correct = 0;
+                    wrong = 0;
+                    total = 0;
+                    questionHistory = [];
+                    answerOptions = [];
+                    document.getElementById(currentSkill + '-parameters').classList.remove('hidden');
+                    updateScore();
+                    updateFontSize();
+                    generateGameProblem();
+                } else {
+                    error.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error('Error in startGame:', e);
+            }
+        }
+
+        function updateFontSize() {
+            try {
+                fontSize = document.getElementById('font-size').value;
+                const gameProblem = document.getElementById('game-problem');
+                const buttons = document.getElementById('answer-options').children;
+                const sizeMap = { small: '24px', medium: '48px', large: '72px', 'extra-large': '96px' };
+                gameProblem.style.fontSize = sizeMap[fontSize] || '72px';
+                for (let button of buttons) button.style.fontSize = sizeMap[fontSize] || '72px';
+            } catch (e) {
+                console.error('Error in updateFontSize:', e);
+            }
+        }
+
+        function generateProblem() {
+            try {
+                let num1 = Math.floor(Math.random() * 100) + 1;
+                let num2 = Math.floor(Math.random() * 100) + 1;
+                let question = `Practice ${currentSkill.replace(/_/g, ' ')} (Coming soon!)`;
+                let answer = null;
+                document.getElementById('problem-display').textContent = question;
+                document.getElementById('user-answer').value = '';
+                document.getElementById('user-answer').disabled = true;
+                document.getElementById('user-answer').placeholder = 'Feature in development';
+                document.getElementById('feedback').textContent = '';
+                currentProblem = { question, answer };
+            } catch (e) {
+                console.error('Error in generateProblem:', e);
+            }
+        }
+
+        function checkAnswer() {
+            try {
+                if (currentProblem.answer === null) return;
+                const userAnswer = parseInt(document.getElementById('user-answer').value);
+                const feedback = document.getElementById('feedback');
+                if (userAnswer === currentProblem.answer) {
+                    feedback.textContent = 'Correct! Great job!';
+                    feedback.classList.remove('text-red-500');
+                    feedback.classList.add('text-green-500');
+                    setTimeout(generateProblem, 1000);
+                } else {
+                    feedback.textContent = `Incorrect. The answer is ${currentProblem.answer}. Try again!`;
+                    feedback.classList.remove('text-green-500');
+                    feedback.classList.add('text-red-500');
+                }
+            } catch (e) {
+                console.error('Error in checkAnswer:', e);
+            }
+        }
+
+        function formatQuestion(nums, isVertical, operation) {
+            try {
+                if (isVertical) {
+                    const maxLen = Math.max(...nums.map(n => n.toString().length));
+                    const separator = operation === 'subtraction' ? '- ' : '+ ';
+                    const question = `<div class="vertical-format">  ${nums.map(n => n.toString().padStart(maxLen, ' ')).join('\n' + separator)}\n${'─'.repeat(maxLen + 2)}\n  ?</div>`;
+                    const pdfQuestion = `  ${nums.map(n => n.toString().padStart(maxLen, ' ')).join('\n' + separator)}\n${'─'.repeat(maxLen + 2)}\n?`;
+                    return { question, pdfQuestion };
+                }
+                const separator = operation === 'subtraction' ? ' - ' : ' + ';
+                const question = `${nums.join(separator)} = ?`;
+                return { question, pdfQuestion: question };
+            } catch (e) {
+                console.error('Error in formatQuestion:', e);
+                return { question: 'Error', pdfQuestion: 'Error' };
+            }
+        }
+
+        function generateGameProblem() {
+            try {
+                let numDigits, allowCarry, allowBorrow, includeZeros, showNumberLine, isVertical, numAddends;
+                if (currentSkill === 'addition') {
+                    numDigits = parseInt(document.getElementById('num-digits').value) || 1;
+                    allowCarry = document.getElementById('carry').checked;
+                    includeZeros = document.getElementById('zeros').checked;
+                    showNumberLine = document.getElementById('number-line').checked;
+                    isVertical = document.getElementById('display-format').value === 'vertical';
+                    numAddends = parseInt(document.getElementById('num-addends').value) || 2;
+                } else if (currentSkill === 'subtraction') {
+                    numDigits = parseInt(document.getElementById('sub-num-digits').value) || 1;
+                    allowBorrow = document.getElementById('borrow').checked;
+                    includeZeros = document.getElementById('sub-zeros').checked;
+                    showNumberLine = document.getElementById('sub-number-line').checked;
+                    isVertical = document.getElementById('sub-display-format').value === 'vertical';
+                }
+
+                let nums = [], answer = 0, question = '', pdfQuestion = '', explanation = '';
+                const gameProblem = document.getElementById('game-problem');
+                answerOptions = [];
+
+                if (currentSkill === 'addition') {
+                    const min = numDigits === 1 ? 1 : numDigits === 2 ? 10 : 100;
+                    const max = numDigits === 1 ? 9 : numDigits === 2 ? 99 : 999;
+                    let attempts = 0;
+                    do {
+                        nums = Array.from({ length: numAddends }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+                        if (includeZeros && Math.random() > 0.5) {
+                            const idx = Math.floor(Math.random() * nums.length);
+                            nums[idx] = Math.floor(nums[idx] / 10) * 10 || Math.floor(Math.random() * 9 + 1) * 10;
+                        }
+                        answer = nums.reduce((sum, num) => sum + num, 0);
+                        attempts++;
+                    } while (allowCarry && numDigits > 1 && attempts < 100 && nums.every((num, i) => {
+                        if (i === nums.length - 1) return true;
+                        const sumOnes = (num % 10) + (nums[i + 1] % 10);
+                        const sumTens = numDigits > 2 ? (Math.floor(num / 10) % 10) + (Math.floor(nums[i + 1] / 10) % 10) : 0;
+                        return sumOnes < 10 && sumTens < 10;
+                    }));
+
+                    const displayNums = nums.map(num => includeZeros ? num.toString().padStart(numDigits, '0') : num);
+                    const format = formatQuestion(displayNums, isVertical, 'addition');
+                    question = format.question;
+                    pdfQuestion = format.pdfQuestion;
+
+                    explanation = `Explanation: For ${nums.join(' + ')}:<br>`;
+                    if (numDigits > 1) {
+                        const onesSum = nums.reduce((sum, num) => sum + (num % 10), 0);
+                        explanation += `Ones: ${nums.map(n => n % 10).join(' + ')} = ${onesSum}${onesSum >= 10 ? ', carry ' + Math.floor(onesSum / 10) : ''}.<br>`;
+                        if (numDigits > 2) {
+                            const tensSum = nums.reduce((sum, num) => sum + (Math.floor(num / 10) % 10), 0) + (onesSum >= 10 ? Math.floor(onesSum / 10) : 0);
+                            explanation += `Tens: ${nums.map(n => Math.floor(n / 10) % 10).join(' + ')}${onesSum >= 10 ? ' + ' + Math.floor(onesSum / 10) : ''} = ${tensSum}${tensSum >= 10 ? ', carry ' + Math.floor(tensSum / 10) : ''}.<br>`;
+                            const hundredsSum = nums.reduce((sum, num) => sum + Math.floor(num / 100), 0) + (tensSum >= 10 ? Math.floor(tensSum / 10) : 0);
+                            explanation += `Hundreds: ${nums.map(n => Math.floor(n / 100)).join(' + ')}${tensSum >= 10 ? ' + ' + Math.floor(tensSum / 10) : ''} = ${hundredsSum}.<br>`;
+                        } else {
+                            const tensSum = nums.reduce((sum, num) => sum + Math.floor(num / 10), 0) + (onesSum >= 10 ? Math.floor(onesSum / 10) : 0);
+                            explanation += `Tens: ${nums.map(n => Math.floor(n / 10)).join(' + ')}${onesSum >= 10 ? ' + ' + Math.floor(onesSum / 10) : ''} = ${tensSum}.<br>`;
+                        }
+                    } else {
+                        explanation += nums.map((n, i) => i === 0 ? n : `${nums.slice(0, i).reduce((a, b) => a + b, 0)} + ${n} = ${nums.slice(0, i + 1).reduce((a, b) => a + b, 0)}`).join('.<br>') + '.';
+                    }
+                    explanation += `<br>Total: ${answer}.`;
+
+                    if (showNumberLine && numDigits === 1 && answer <= 18) {
+                        let numberLine = '0';
+                        let current = nums[0];
+                        explanation += `<br>Number line: Start at ${nums[0]}, move ${nums.slice(1).join(' then ')} right.<br>`;
+                        for (let i = 1; i <= answer; i++) {
+                            numberLine += i === current ? ' [Start] ' : i === answer ? ' [End]' : ' -';
+                            if (i === current && nums.length > 1) {
+                                nums.shift();
+                                current += nums[0] || 0;
+                            }
+                        }
+                        explanation += `<span class="number-line">${numberLine}</span>`;
+                    }
+
+                    answerOptions = [answer];
+                    const distractorRange = numDigits === 1 ? 11 : numDigits === 2 ? 21 : 51;
+                    while (answerOptions.length < 4) {
+                        const wrongAnswer = answer + Math.floor(Math.random() * distractorRange - distractorRange / 2);
+                        if (wrongAnswer !== answer && wrongAnswer >= numAddends * min && wrongAnswer <= numAddends * max && !answerOptions.includes(wrongAnswer)) {
+                            answerOptions.push(wrongAnswer);
+                        }
+                    }
+                } else if (currentSkill === 'subtraction') {
+                    const min = numDigits === 1 ? 1 : numDigits === 2 ? 10 : 100;
+                    const max = numDigits === 1 ? 9 : numDigits === 2 ? 99 : 999;
+                    let minuend, subtrahend, attempts = 0;
+                    do {
+                        minuend = Math.floor(Math.random() * (max - min + 1)) + min;
+                        subtrahend = Math.floor(Math.random() * (max - min + 1)) + min;
+                        if (minuend < subtrahend) [minuend, subtrahend] = [subtrahend, minuend];
+                        if (includeZeros && Math.random() > 0.5) {
+                            if (Math.random() > 0.5) {
+                                minuend = Math.floor(minuend / 10) * 10 || Math.floor(Math.random() * 9 + 1) * 10;
+                            } else {
+                                subtrahend = Math.floor(subtrahend / 10) * 10 || Math.floor(Math.random() * 9 + 1) * 10;
+                            }
+                        }
+                        answer = minuend - subtrahend;
+                        attempts++;
+                    } while (allowBorrow && numDigits > 1 && attempts < 100 && (
+                        (minuend % 10) >= (subtrahend % 10) &&
+                        (numDigits > 2 ? Math.floor(minuend / 10) % 10 >= Math.floor(subtrahend / 10) % 10 : true)
+                    ));
+
+                    nums = [minuend, subtrahend];
+                    const displayNums = nums.map(num => includeZeros ? num.toString().padStart(numDigits, '0') : num);
+                    const format = formatQuestion(displayNums, isVertical, 'subtraction');
+                    question = format.question;
+                    pdfQuestion = format.pdfQuestion;
+
+                    explanation = `Explanation: For ${minuend} - ${subtrahend}:<br>`;
+                    if (numDigits > 1) {
+                        const onesMin = minuend % 10;
+                        const onesSub = subtrahend % 10;
+                        let onesDiff = onesMin - onesSub;
+                        let borrowFromTens = 0;
+                        if (onesDiff < 0) {
+                            onesDiff += 10;
+                            borrowFromTens = 1;
+                            explanation += `Ones: ${onesMin} - ${onesSub} needs borrowing. Borrow 1 from tens, so ${onesMin} + 10 = ${onesMin + 10}, then ${onesMin + 10} - ${onesSub} = ${onesDiff}.<br>`;
+                        } else {
+                            explanation += `Ones: ${onesMin} - ${onesSub} = ${onesDiff}.<br>`;
+                        }
+                        if (numDigits > 2) {
+                            const tensMin = Math.floor(minuend / 10) % 10 - borrowFromTens;
+                            const tensSub = Math.floor(subtrahend / 10) % 10;
+                            let tensDiff = tensMin - tensSub;
+                            let borrowFromHundreds = 0;
+                            if (tensDiff < 0) {
+                                tensDiff += 10;
+                                borrowFromHundreds = 1;
+                                explanation += `Tens: ${Math.floor(minuend / 10) % 10}${borrowFromTens ? ' - 1' : ''} - ${tensSub} needs borrowing. Borrow 1 from hundreds, so ${Math.floor(minuend / 10) % 10} + 10 = ${Math.floor(minuend / 10) % 10 + 10}, then ${Math.floor(minuend / 10) % 10 + 10 - borrowFromTens} - ${tensSub} = ${tensDiff}.<br>`;
+                            } else {
+                                explanation += `Tens: ${Math.floor(minuend / 10) % 10}${borrowFromTens ? ' - 1' : ''} - ${tensSub} = ${tensDiff}.<br>`;
+                            }
+                            const hundredsDiff = Math.floor(minuend / 100) - Math.floor(subtrahend / 100) - borrowFromHundreds;
+                            explanation += `Hundreds: ${Math.floor(minuend / 100)}${borrowFromHundreds ? ' - 1' : ''} - ${Math.floor(subtrahend / 100)} = ${hundredsDiff}.<br>`;
+                        } else {
+                            const tensDiff = Math.floor(minuend / 10) - Math.floor(subtrahend / 10) - borrowFromTens;
+                            explanation += `Tens: ${Math.floor(minuend / 10)}${borrowFromTens ? ' - 1' : ''} - ${Math.floor(subtrahend / 10)} = ${tensDiff}.<br>`;
+                        }
+                    } else {
+                        explanation += `Subtract: ${minuend} - ${subtrahend} = ${answer}.`;
+                    }
+                    explanation += `<br>Total: ${answer}.`;
+
+                    if (showNumberLine && numDigits === 1 && answer <= 18 && minuend <= 18) {
+                        let numberLine = '0';
+                        explanation += `<br>Number line: Start at ${minuend}, move ${subtrahend} left.<br>`;
+                        for (let i = 1; i <= Math.max(minuend, subtrahend, answer); i++) {
+                            numberLine += i === minuend ? ' [Start] ' : i === answer ? ' [End]' : ' -';
+                        }
+                        explanation += `<span class="number-line">${numberLine}</span>`;
+                    }
+
+                    answerOptions = [answer];
+                    const distractorRange = numDigits === 1 ? 11 : numDigits === 2 ? 21 : 51;
+                    while (answerOptions.length < 4) {
+                        const wrongAnswer = answer + Math.floor(Math.random() * distractorRange - distractorRange / 2);
+                        if (wrongAnswer !== answer && wrongAnswer >= 0 && wrongAnswer <= max && !answerOptions.includes(wrongAnswer)) {
+                            answerOptions.push(wrongAnswer);
+                        }
+                    }
+                } else {
+                    question = `Practice ${currentSkill.replace(/_/g, ' ')} (Coming soon!)`;
+                    pdfQuestion = question;
+                    explanation = 'Feature in development';
+                    gameProblem.textContent = question;
+                    document.getElementById('answer-options').innerHTML = '';
+                    document.getElementById('game-feedback').innerHTML = explanation;
+                    return;
+                }
+
+                answerOptions.sort(() => Math.random() - 0.5);
+                currentProblem = { question, answer, nums, explanation, pdfQuestion };
+                gameProblem.innerHTML = question;
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById('answer-options').children[i].textContent = answerOptions[i];
+                }
+                document.getElementById('game-feedback').innerHTML = '';
+            } catch (e) {
+                console.error('Error in generateGameProblem:', e);
+                document.getElementById('game-problem').textContent = 'Error generating problem';
+                document.getElementById('game-feedback').innerHTML = 'An error occurred. Please try again.';
+            }
+        }
+
+        function checkGameAnswer(index) {
+            try {
+                if (!answerOptions.length) return;
+                const userAnswer = answerOptions[index];
+                const feedback = document.getElementById('game-feedback');
+                total++;
+                if (userAnswer === currentProblem.answer) {
+                    correct++;
+                    feedback.innerHTML = 'Correct!<br>Great job!';
+                    feedback.classList.remove('text-red-500');
+                    feedback.classList.add('text-green-500');
+                } else {
+                    wrong++;
+                    feedback.innerHTML = `Incorrect.<br>Correct answer: ${currentProblem.answer}.<br>${currentProblem.explanation}`;
+                    feedback.classList.remove('text-green-500');
+                    feedback.classList.add('text-red-500');
+                }
+                questionHistory.push({
+                    question: currentProblem.pdfQuestion,
+                    userAnswer,
+                    correct: userAnswer === currentProblem.answer,
+                    explanation: currentProblem.explanation
+                });
+                updateScore();
+            } catch (e) {
+                console.error('Error in checkGameAnswer:', e);
+                document.getElementById('game-feedback').innerHTML = 'Error checking answer.';
+            }
+        }
+
+        function updateScore() {
+            try {
+                const correctPercent = total ? ((correct / total) * 100).toFixed(2) : 0;
+                const wrongPercent = total ? ((wrong / total) * 100).toFixed(2) : 0;
+                document.getElementById('score').textContent = `Correct: ${correct} (${correctPercent}%) | Wrong: ${wrong} (${wrongPercent}%)`;
+            } catch (e) {
+                console.error('Error in updateScore:', e);
+            }
+        }
+
+        function nextQuestion() {
+            try {
+                generateGameProblem();
+            } catch (e) {
+                console.error('Error in nextQuestion:', e);
+            }
+        }
+
+        function downloadResults() {
+            try {
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    alert('PDF generation failed. Please ensure internet connection for jsPDF.');
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(16);
+                doc.text('Math Mastery Results', 20, 20);
+                doc.setFontSize(12);
+                doc.text(`Name: ${name}`, 20, 30);
+                doc.text(`Skill: ${currentSkill.charAt(0).toUpperCase() + currentSkill.slice(1)}`, 20, 40);
+                let params = '';
+                if (currentSkill === 'addition') {
+                    params = `Digits: ${document.getElementById('num-digits').value}, Carry: ${document.getElementById('carry').checked ? 'Yes' : 'No'}, Addends: ${document.getElementById('num-addends').value}, Zeros: ${document.getElementById('zeros').checked ? 'Yes' : 'No'}, Number Line: ${document.getElementById('number-line').checked ? 'Yes' : 'No'}, Format: ${document.getElementById('display-format').value}`;
+                } else if (currentSkill === 'subtraction') {
+                    params = `Digits: ${document.getElementById('sub-num-digits').value}, Borrow: ${document.getElementById('borrow').checked ? 'Yes' : 'No'}, Zeros: ${document.getElementById('sub-zeros').checked ? 'Yes' : 'No'}, Number Line: ${document.getElementById('sub-number-line').checked ? 'Yes' : 'No'}, Format: ${document.getElementById('sub-display-format').value}`;
+                }
+                doc.text(`Parameters: ${params}`, 20, 50);
+                let y = 60;
+                questionHistory.forEach((q, i) => {
+                    doc.text(`Question ${i + 1}: ${q.question}`, 20, y);
+                    doc.text(`Your Answer: ${q.userAnswer}, ${q.correct ? 'Correct' : 'Incorrect'}`, 20, y + 10);
+                    doc.text(`Explanation:`, 20, y + 20);
+                    const explanationLines = doc.splitTextToSize(q.explanation.replace(/<br>/g, '\n').replace(/<[^>]+>/g, ''), 170);
+                    doc.text(explanationLines, 20, y + 30);
+                    y += 30 + explanationLines.length * 10;
+                });
+                doc.text(`Score: Correct: ${correct} (${total ? ((correct / total) * 100).toFixed(2) : 0}%), Wrong: ${wrong} (${total ? ((wrong / total) * 100).toFixed(2) : 0}%)`, 20, y);
+                doc.save('Math_Mastery_Results.pdf');
+            } catch (e) {
+                console.error('Error in downloadResults:', e);
+                alert('Error generating PDF.');
+            }
+        }
+    </script>
+</body>
+</html>
